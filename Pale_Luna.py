@@ -11,15 +11,21 @@ class PaleLunaGUI:
         self.master.config(bg="black")
 
         #DIRECTORY FOR IMAGES
-        self.images_dir = os.path.join(os.path.dirname(__file__), r"C:\Users\tenic\Downloads\UIUC Spring 2024\BCOG 200\Pale Luna\images")
+        self.images_dir = os.path.join(os.path.dirname(__file__), "images")
 
         #REQUIREMENTS FOR LEAVING PSG 1
         self.current_passage = 1
+
         self.items_collected = {
             "GOLD": False,
             "SHOVEL": False,
             "ROPE": False,
             "DOOR_OPEN": False
+        }
+
+        #CHECKS TO SEE IF GOLD IS BURIED BEFORE PROCEEDING
+        self.buried_gold = {
+            "BURIED_GOLD": False
         }
 
         #DICTIONARY FOR IMAGES USED IN THE GAME. USE ONLY PNG!
@@ -36,7 +42,6 @@ class PaleLunaGUI:
             9: "here.png",
             10: "hole.png",
             11: "bury_gold.png",
-            12: "coords.png",
         }
 
         #ALL SCENARIOS IN GAME
@@ -53,7 +58,8 @@ class PaleLunaGUI:
                 "choices": ["Go NORTH", "Go WEST", "Go SOUTH", "Use GOLD", "Use SHOVEL", "Use ROPE"]},
             6: {"text": "Reap your reward. \nPALE LUNA SMILES AT YOU. \nYou are here.", 
                 "choices": ["Use GOLD", "Use ROPE", "Use SHOVEL"]},
-        }
+            7: {"text": "There is a hole in the ground. \nPALE LUNA SMILES AT YOU. \nOne more thing to do.", "choices": ["Use GOLD", "Use ROPE", "Use SHOVEL"]},
+            8: {"text": "(37.741860, -97.245460)", "choices": ["Reap your reward."]},        }
 
         #FRAME FOR TEXT AND BUTTONS 
         self.frame = tk.Frame(master, bg="black")
@@ -105,23 +111,23 @@ class PaleLunaGUI:
             self.update_image(self.images[8])
         elif self.current_passage == 6:
             self.update_image(self.images[9])
+        elif self.current_passage == 7:
+            self.update_image(self.images[10])
+        elif self.current_passage == 8:
+            self.update_image(self.images[11])
         else:
             self.update_image(self.images[self.current_passage])
 
     def update_image(self, image_name):
-
         original_image = Image.open(os.path.join(self.images_dir, image_name))
-        
-        desired_width = 300  
-        
+
+        desired_width = 300
         width_percent = (desired_width / float(original_image.size[0]))
         desired_height = int((float(original_image.size[1]) * float(width_percent)))
-        
         resized_image = original_image.resize((desired_width, desired_height), Image.LANCZOS)
-        
+
         self.photo = ImageTk.PhotoImage(resized_image)
-        
-        self.image_label.configure(image=self.photo)
+        self.image_label.configure(image=self.photo) 
 
 
     #EVERY DECISION THE PLAYER MAKES IS DONE HERE 
@@ -247,6 +253,33 @@ class PaleLunaGUI:
                 self.passage_label.config(text="Used SHOVEL.")
                 self.current_passage = 7
                 self.update_display()
+
+        elif self.current_passage == 7:
+
+            if choice == 0:
+                self.passage_label.config(text="Buried gold")
+
+            elif choice == 1:
+                self.passage_label.config(text="Seriously when has this option ever worked. YOU ALREADY USED THIS")
+                return
+
+            elif choice == 2:
+                if self.buried_gold == False:
+                    self.passage_label.config("Can't cover a hole without a treasure.")
+                    return
+                else:
+                    self.passage_label.config(text="Reap your reward. \nPALE LUNA SMILES AT YOU.")
+                    self.update_image("bury_gold.png")
+                    self.current_passage = 8
+                    self.update_display()
+
+
+        elif self.current_passage == 8:
+            if choice == 0: 
+                exit()
+                    
+
+
                 
     #FOR EACH ITEM ATTAINED SO THAT DOING ALLAT DOESN'T GET REPETITIVE 
     def display_intermediary_screen(self, item):
